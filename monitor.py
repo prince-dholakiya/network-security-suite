@@ -164,5 +164,5 @@ if __name__ == "__main__":
     monitor = NetworkMonitor()      
     
     #Capture 50 packets for testing (change to 0 for continuous monitoring)
-    monitor.start_monitoring(packet_count=50)     
+    monitor.start_monitoring(packet_count=0)     
         
