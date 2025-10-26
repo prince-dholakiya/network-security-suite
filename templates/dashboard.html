@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Security Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Network Security Assessment Suite</h1>
+            <p class="subtitle">Real-time monitoring and vulnerability scanning dashboard</p>
+        </header>
+
+        <div class="grid">
+            <!--vulnerability Scanner Results-->
+            <div class="card">
+                <h2>vulnerability Scanner</h2>
+                {% if scan_report %}
+                    <p><strong>Report:</strong>{{ scan_file }}</p>
+                    <div class="report-content">{{ scan_report }}</div>
+                {% else %}
+                    <div class="no-data">
+                        No scan reports found. Run scanner.py first!
+                    </div>
+                {% endif %}    
+            </div>
+
+            <div class="card">
+                <h2>Network Monitor</h2>
+                {% if monitor_data %}
+                    <p><strong>Report:</strong> {{ monitor_file }}</p>
+
+                    <div class="stat-box">
+                        <span class="stat-label">Total packets:</span>
+                        <span class="stat-value">{{ monitor_data.total_packets }}</span>
+                    </div>
+
+                    <div class="stat-box">
+                        <span class="stat-label">Monitoring Time:</span>
+                        <span class="stat-value">{{ monitor_data.timestamp }}</span>
+                    </div>
+
+                    <h3 style="margin-top: 20px; color: #333;">Protocol Distribution</h3>
+                    {% for protocol, count in monitor_data.protocol_stats.items() %}
+                        <div class="stat-box">
+                            <span class="stat-label">{{ protocol }}:</span>
+                            <span class="stat-value">{{ count }} packets</span>
+                        </div>
+                    {% endfor %}
+                    
+                    <h3 style="margin-top: 20px; color: #333;">Suspicious</h3>
+                    {% for ip, count in monitor_data.suspicious[:5] %}
+                        <div class="stat-box">
+                            <span class="stat-label">{{ ip }}:</span>
+                            <span class="stat-value">{{ count }} packets</span>
+                        </div>
+                    {% endfor %}
+
+                    {% if monitor_data.alerts %}
+                        <h3 style="margin-top: 20px; color:#dc3545;">Security Alerts</h3>
+                        {% for alert in monitor_data.alerts%}
+                            <div class="alert alert-high">
+                                <strong>[{{ alert.severity }}]</strong> {{ alert.type }}<br>
+                                <small>Source: {{ alert.source_ip }} | Time: {{ alert.timestamp }}</small>
+                            </div>
+                        {% endfor %}   
+                    {% endif %}  
+                {% else %}
+                    <div class="no-data">
+                        No monitoring data found. Run monitor.py first!
+                    </div> 
+                {% endif %}    
+                
+                <button class="refresh-btn" onclick="location.reload()"> Refresh Dashboard</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
