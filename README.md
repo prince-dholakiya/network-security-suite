@@ -1,6 +1,7 @@
 # Network Security Assessment Suite
 
 A network security tool combining vulnerability scanning and real-time traffic monitoring.
+**Note** : It is built for educatinal purpose. Don't try to use it for malicious purpose.
 
 ## Features
 
@@ -60,3 +61,5 @@ Built while learning Python and cybersecurity concepts from Cisco certifications
 - Packet analysis
 - Security monitoring
 - Web development
+
+Note : This project is work when you connected with home/office network. It just scan local device when you connect with mobile hotspot or technology which isolates AP( or devices) .
