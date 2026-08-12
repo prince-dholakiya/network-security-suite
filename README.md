@@ -29,12 +29,22 @@ pip install -r requirements.txt
 
 ## Usage
 ```bash
-# Run full suite
+# Run full suite (interactive menu)
 python run_suite.py
-python scanner.py      # Vulnerability scan
-python monitor.py      # Network monitoring
-python dashboard.py    # View results
+
+# Or run modules individually
+python scanner.py           # Vulnerability scan
+python monitor.py           # Network monitoring (defaults to 50 packets)
+python monitor.py 0         # Continuous monitoring (Ctrl+C to stop)
+python dashboard.py         # View results at http://localhost:5001
 ```
+
+**Note:** `scanner.py` and `monitor.py` need elevated privileges to scan the network and
+capture packets. Run with `sudo python3 scanner.py` / `sudo python3 monitor.py` on
+Linux/Mac, or an Administrator terminal on Windows.
+
+To run the dashboard with Flask's debug mode on (for local development), set:
+`FLASK_DEBUG=1 python dashboard.py`
 
 ## Screenshots
 
