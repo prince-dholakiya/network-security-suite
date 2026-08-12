@@ -9,11 +9,19 @@ def get_local_network():
     
     "Get your computer's IP address to scan the local network"
     
-    hostname = socket.gethostname()
-    
-    #Get IP address
-    local_IP = socket.gethostbyname(hostname)
-    
+    #socket.gethostbyname(hostname) is unreliable on Linux - it often returns
+    #127.0.1.1 instead of the real LAN IP. Opening a UDP "connection" to a
+    #public address (no packets actually sent) forces the OS to pick the
+    #real outbound interface IP instead.
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        local_IP = s.getsockname()[0]
+    except Exception:
+        #Fallback for offline/isolated networks
+        local_IP = socket.gethostbyname(socket.gethostname())
+    finally:
+        s.close()
     
     #Extract range of network
     network_parts = local_IP.split('.')
@@ -29,8 +37,13 @@ def discover_devices(network):
     print(f"\n{Fore.CYAN}[*] Starting device discovery on {network}...")
     print("This may take 1-2 minutes... \n")
     
-    #Create nmap scanner object
-    nm = nmap.PortScanner()
+    try:
+        #Create nmap scanner object (requires the nmap binary installed on the OS)
+        nm = nmap.PortScanner()
+    except nmap.PortScannerError:
+        print(f"{Fore.RED}[!] nmap not found. Install it first: 'sudo apt install nmap' (Linux) "
+              f"or 'brew install nmap' (Mac), then 'pip install python-nmap'.")
+        return []
     
     #Scan the network( -sn means only ping scan to find devices)
     nm.scan(hosts=network, arguments='-sn')
@@ -94,7 +107,7 @@ def check_vulnerabilities(device):
     
     risky_ports = {
         21 : "FTP - Unencrypted file transfer",
-        23 : "TELNET - unencryoted remote access",
+        23 : "TELNET - unencrypted remote access",
         3389 : "RDP - often targeted for brute force attack",
         8080 : "HTTP proxy - may expose internal service"
     }    
