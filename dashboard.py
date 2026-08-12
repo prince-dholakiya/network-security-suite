@@ -51,5 +51,11 @@ if __name__ == '__main__':
     print("\n[+] Starting web server..")
     print("[+] Open your browser and go to : http://localhost:5001")
     
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    #debug=False by default: Flask's debug mode exposes an interactive
+    #debugger in the browser that allows arbitrary code execution if anyone
+    #else on the network can reach this port - a bad idea for a security tool.
+    #Set FLASK_DEBUG=1 as an env var if you want debug mode during development.
+    import os
+    debug_mode = os.environ.get('FLASK_DEBUG', '0') == '1'
+    app.run(debug=debug_mode, host='0.0.0.0', port=5001)
         
