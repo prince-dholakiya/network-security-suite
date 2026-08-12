@@ -2,6 +2,7 @@ from scapy.all import sniff, IP, TCP, UDP, ARP
 from datetime import datetime
 from collections import defaultdict
 import json
+import sys
 
 #store statistics
 class NetworkMonitor:
@@ -91,6 +92,11 @@ class NetworkMonitor:
         
         except KeyboardInterrupt:
             print("\n\n[!] Monitoring stopped by user")
+        except PermissionError:
+            print("\n[!] Permission denied. Packet sniffing needs elevated privileges.")
+            print("    Run with: sudo python3 monitor.py   (Linux/Mac)")
+            print("    Or run your terminal as Administrator (Windows)")
+            return
         except Exception as e:
             print(f"\n[!] Error: {e}")  
         
@@ -114,12 +120,12 @@ class NetworkMonitor:
         #Show protocol distribution
         print("\nProtocol Distribution:")
         for protocol, count in self.protocol_stats.items():
-            percentage = (count / self.packet_count) * 100
+            percentage = (count / self.packet_count) * 100 if self.packet_count else 0
             print(f" {protocol}: {count} packets ({percentage:.1f}%)")               
         
         #Show top ports
         print("\nTop 5 Destination Ports:")
-        sorted_ports = sorted(self.port_stats.items(), key=lambda x: x[1], reverse=True)[:50]
+        sorted_ports = sorted(self.port_stats.items(), key=lambda x: x[1], reverse=True)[:5]
         for port, count in sorted_ports:
             print(f" Port {port}: {count} packets")
             
@@ -161,8 +167,17 @@ class NetworkMonitor:
         
 #Test the Monitor
 if __name__ == "__main__":
-    monitor = NetworkMonitor()      
-    
-    #Capture 50 packets for testing (change to 0 for continuous monitoring)
-    monitor.start_monitoring(packet_count=0)     
-        
+    monitor = NetworkMonitor()
+
+    #Optional CLI arg: python monitor.py <packet_count>
+    #packet_count = 0 means capture continuously until Ctrl+C
+    #Defaults to 50 packets if no argument is given
+    count = 50
+    if len(sys.argv) > 1:
+        try:
+            count = int(sys.argv[1])
+        except ValueError:
+            print(f"[!] Invalid packet count '{sys.argv[1]}', defaulting to 50")
+            count = 50
+
+    monitor.start_monitoring(packet_count=count)
